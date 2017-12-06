@@ -26,45 +26,46 @@ class App extends Component {
         'email': 'yuliya.tsikhamirava@helmes.ee'
       }
     ],
+    id: '',
     name: '',
     email: '',
-    search: ''
+    search: '',
+    warning: ''
   }
+  // const arr = [1, 2, 3]; // 1, 2, 3
+  // const arr2 = [...arr]; // 1, 2, 3
+  // const arr3 = arr.concat([4, 5, 6]); // 1, 2, 3, 4, 5, 6
+  // const arr4 = [...arr, ...arr2, 4, 5, 6, ...arr]; // 1, 2, 3, 1, 2, 3, 4, 5, 6, 1, 2, 3
+  // const arr5 = [arr, 4, 5, 6]; // [1, 2, 3], 4, 5, 6
+
+  // const label = 'Feature';
+  // const description = 'Cool Feature';
+  // const obj = {
+  //   label: 'Feature',
+  //   description: 'Cool Feature'
+  // };
+  // const obj2 = {
+  //   label: label,
+  //   description: description
+  // };
+  // const obj = {
+  //   label,
+  //   descr: description
+  // };
 
   addEmployeeHandler = (event) => {
-    const { name, email } = this.state;
-
-    // const arr = [1, 2, 3]; // 1, 2, 3
-    // const arr2 = [...arr]; // 1, 2, 3
-    // const arr3 = arr.concat([4, 5, 6]); // 1, 2, 3, 4, 5, 6
-    // const arr4 = [...arr, ...arr2, 4, 5, 6, ...arr]; // 1, 2, 3, 1, 2, 3, 4, 5, 6, 1, 2, 3
-    // const arr5 = [arr, 4, 5, 6]; // [1, 2, 3], 4, 5, 6
-
-    // const label = 'Feature';
-    // const description = 'Cool Feature';
-    // const obj = {
-    //   label: 'Feature',
-    //   description: 'Cool Feature'
-    // };
-    // const obj2 = {
-    //   label: label,
-    //   description: description
-    // };
-    // const obj = {
-    //   label,
-    //   descr: description
-    // };
-
-    this.setState({ employees: [...this.state.employees, { name: name, email: email }] });
-
-    // var filtered = this.state.employees.filter(employee =>
-    //   employee.name.toLowerCase().includes(event.target.value.toLowerCase())); 
-    // if (filtered.length !== 0) {
-    //   this.setState({ 'warnings': 'User with such name already exists!' })
-    // }
-    // this.setState((prevState, props)=>{employees: [...prevState.employees, { name, email }]});
+    var found = this.state.employees.find(employee =>
+      employee.name.toLowerCase().includes(this.state.name));
+    if (found) {
+      this.setState({ warning: 'User with such name already exists' })
+    }
+    else {
+      const { id, name, email } = this.state;
+      var newId = this.state.employees.length + 1;
+      this.setState({ employees: [...this.state.employees, { id: newId, name: name, email: email }], id: parseInt(newId) + 1 });
+    }
   }
-  /*??*/
+
   updateEmployeeHandler = (id) => {
     const { name, email } = this.state;
     this.setState({ employees: [...this.state.employees, { name, email }] });
@@ -87,8 +88,8 @@ class App extends Component {
     this.setState({ employees: filtered })
     //this.updatePageData({filtered});
   }
-  /*Search works in a proper way but if search started buttons add/remove/edit dont work any more*/
-  filterSearchHandler = (event) => {
+
+  searchEmployeeHandler = (event) => {
     this.setState({ search: event.target.value.toLowerCase() });
     console.log(this.state.search);
   }
@@ -113,14 +114,15 @@ class App extends Component {
           change={this.changeEmployeeParamsHandler}
           edit={this.editEmployeeHandler}
           update={this.updateEmployeeHandler}
-          warning={this.warnings}
+          warning={this.state.warning}
+          id={this.state.id}
         />
 
         <Employees
           list={filteredEmployees}
           edit={this.editEmployeeHandler}
           remove={this.removeEmployeeHandler}
-          search={this.filterSearchHandler}
+          search={this.searchEmployeeHandler}
 
         />
         <EditEmployee />
