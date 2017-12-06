@@ -7,4 +7,4 @@ const editEmployee=(props)=>{
     </div>)
 }
 
-export default EditEmployee;
+export default editEmployee;
