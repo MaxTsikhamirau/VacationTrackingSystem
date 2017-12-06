@@ -68,12 +68,18 @@ class App extends Component {
 
   updateEmployeeHandler = (id) => {
     const { name, email } = this.state;
-    this.setState({ employees: [...this.state.employees, { name, email }] });
-    // this.setState((prevState, props)=>{employees: [...prevState.employees, { name, email }]});
+    var updatedEmployee = this.state.employees.find(employee =>
+      employee.id.includes(this.state.id));
+    console.log(updatedEmployee);
+    updatedEmployee.email = this.state.email;
+    updatedEmployee.name = this.state.name;
+    this.setState({ employees: [...this.state.employees] })
+
+    // this.setState({ employees: [...this.state.employees, { name, email }] });
   }
 
   changeEmployeeParamsHandler = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
+    this.setState({ [event.target.name]: event.target.value , warning:''});
   }
 
   editEmployeeHandler = (id) => {
@@ -95,7 +101,6 @@ class App extends Component {
   }
 
   render() {
-    var filteredEmployees = this.state.employees;
     var filteredEmployees = (this.state.search === '') ? this.state.employees :
       this.state.employees.filter(employee =>
         employee.name.toLowerCase().includes(this.state.search));
@@ -111,11 +116,10 @@ class App extends Component {
           addEmployee={this.addEmployeeHandler}
           name={this.state.name}
           email={this.state.email}
-          change={this.changeEmployeeParamsHandler}
-          edit={this.editEmployeeHandler}
-          update={this.updateEmployeeHandler}
-          warning={this.state.warning}
           id={this.state.id}
+          warning={this.state.warning}
+          change={this.changeEmployeeParamsHandler}
+          update={this.updateEmployeeHandler}
         />
 
         <Employees
@@ -123,7 +127,6 @@ class App extends Component {
           edit={this.editEmployeeHandler}
           remove={this.removeEmployeeHandler}
           search={this.searchEmployeeHandler}
-
         />
         <EditEmployee />
 

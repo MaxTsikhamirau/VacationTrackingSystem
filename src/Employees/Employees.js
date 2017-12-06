@@ -1,7 +1,7 @@
 import React from 'react';
 import './Employees.css'
 
-const employees = (props) => {    
+const employees = (props) => {
 
     const employeesList = props.list.map(employee => (
 
@@ -15,7 +15,7 @@ const employees = (props) => {
         </div>
     ));
     return (<div>
-        <input type='text' name='search' onChange={props.search} placeholder='search...' /> 
+        <input type='text' name='search' onChange={props.search} placeholder='search...' />
         <h3>{employeesList}</h3></div>);
 }
 export default employees;
