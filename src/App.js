@@ -31,27 +31,7 @@ class App extends Component {
     email: '',
     search: '',
     warning: ''
-  }
-  // const arr = [1, 2, 3]; // 1, 2, 3
-  // const arr2 = [...arr]; // 1, 2, 3
-  // const arr3 = arr.concat([4, 5, 6]); // 1, 2, 3, 4, 5, 6
-  // const arr4 = [...arr, ...arr2, 4, 5, 6, ...arr]; // 1, 2, 3, 1, 2, 3, 4, 5, 6, 1, 2, 3
-  // const arr5 = [arr, 4, 5, 6]; // [1, 2, 3], 4, 5, 6
-
-  // const label = 'Feature';
-  // const description = 'Cool Feature';
-  // const obj = {
-  //   label: 'Feature',
-  //   description: 'Cool Feature'
-  // };
-  // const obj2 = {
-  //   label: label,
-  //   description: description
-  // };
-  // const obj = {
-  //   label,
-  //   descr: description
-  // };
+  } 
 
   addEmployeeHandler = (event) => {
     var found = this.state.employees.find(employee =>
@@ -64,6 +44,7 @@ class App extends Component {
       var newId = this.state.employees.length + 1;
       this.setState({ employees: [...this.state.employees, { id: newId, name: name, email: email }], id: parseInt(newId) + 1 });
     }
+    this.setState({name:'', email:''})
   }
 
   updateEmployeeHandler = (id) => {
@@ -73,9 +54,7 @@ class App extends Component {
     console.log(updatedEmployee);
     updatedEmployee.email = this.state.email;
     updatedEmployee.name = this.state.name;
-    this.setState({ employees: [...this.state.employees] })
-
-    // this.setState({ employees: [...this.state.employees, { name, email }] });
+    this.setState({ employees: [...this.state.employees] })    
   }
 
   changeEmployeeParamsHandler = (event) => {
@@ -91,8 +70,7 @@ class App extends Component {
 
   removeEmployeeHandler = (id) => {
     const filtered = this.state.employees.filter(e => e.id !== id);
-    this.setState({ employees: filtered })
-    //this.updatePageData({filtered});
+    this.setState({ employees: filtered })   
   }
 
   searchEmployeeHandler = (event) => {

@@ -9,8 +9,8 @@ const employees = (props) => {
             <div>#{employee.id}</div><div>{employee.name}</div>
             <div>{employee.email}</div>
             <div>
-                <button name='Edit' onClick={props.edit.bind(this, employee.id)}>Edit</button>
-                <button name='Remove' onClick={props.remove.bind(this, employee.id)}>Remove</button>
+                <button name='Edit' classNmame='btn btn-lg btn-success' onClick={props.edit.bind(this, employee.id)}>Edit</button>
+                <button name='Remove' classNmame='btn btn-lg btn-success' onClick={props.remove.bind(this, employee.id)}>Remove</button>
             </div>
         </div>
     ));
