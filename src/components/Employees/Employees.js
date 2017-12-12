@@ -1,16 +1,20 @@
 import React from 'react';
-import './Employees.css'
+import './Employees.css';
+//import MultiSelectField from '../components/Employees/Multiselect/Multiselect';
 
 const employees = (props) => {
 
     const employeesList = props.list.map(employee => (
+        
 
         <div className='Employees' key={employee.id}>
             <div>#{employee.id}</div><div>{employee.name}</div>
             <div>{employee.email}</div>
+            <div>{employee.groups}</div>
             <div>
                 <button name='Edit' classNmame='btn btn-lg btn-success' onClick={props.edit.bind(this, employee.id)}>Edit</button>
                 <button name='Remove' classNmame='btn btn-lg btn-success' onClick={props.remove.bind(this, employee.id)}>Remove</button>
+
             </div>
         </div>
     ));
@@ -20,18 +24,4 @@ const employees = (props) => {
 }
 export default employees;
 
-
-/*Questions:
-
-1)Should I bind eventListeners to the fields Im searching for? 
-if search for name it should be like .bind(this, employee.name)? 
-
-2) when alert that user already exists its a kind of search anyway? (seraching by name, if found=>alert)?
-
-3)some explanations on syntax filter(e => e.id !== id)
-
-4)props.search.bind(this, props.employees.name) where can I get the user? what is the approach?
-
-
-
-*/
+/*Split an array*/

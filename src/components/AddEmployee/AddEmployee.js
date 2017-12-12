@@ -1,5 +1,4 @@
 import React from 'react';
-// import EditEmployee from 'src/EditEmployee/EditEmployee';
 
 const addEmployee = (props) => {
     if (props.warning) {
@@ -9,8 +8,12 @@ const addEmployee = (props) => {
         <div>{props.warning}</div>
         <input type='text' name='name' value={props.name} onChange={props.change} placeholder='name' />
         <input type='text' name='email' value={props.email} onChange={props.change} placeholder='email' />
-        <button onClick={props.addEmployee}>Add Employee</button>       
-        <button name='Update' onClick={props.update.bind(this, props.id)} >Update Employee</button>
+        {(props.id) ?
+            <button name='Update' onClick={props.update.bind(this, props.id)} >Update Employee</button> :
+            <button name='Add' onClick={props.addEmployee}>Add Employee</button>
+        }
+
+
     </div>)
 }
 
