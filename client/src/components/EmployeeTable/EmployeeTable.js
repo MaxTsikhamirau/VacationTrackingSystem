@@ -11,10 +11,11 @@ import {
 import FlatButton from 'material-ui/FlatButton';
 import FontIcon from 'material-ui/FontIcon';
 import Pagination from 'material-ui-pagination';
+import { Link } from 'react-router-dom';
 
 
-const employeeTable = (props) => {    
-   
+const employeeTable = (props) => {
+
     const row = props.list.map(employee => (
 
         <TableRow key={employee.id}>
@@ -45,9 +46,10 @@ const employeeTable = (props) => {
         </TableRow>
     ));
     return (<div>
-        <Table
-            striped
-        >
+        <Link to='/manage'>
+            <button name='Add' classNmame='btn btn-lg btn-success' >Add</button>
+        </Link>
+        <Table>
             <TableHeader>
                 <TableRow>
                     {props.header.map((x, i) =>
@@ -61,7 +63,7 @@ const employeeTable = (props) => {
 
             </TableBody>
         </Table>
-       
+
     </div>)
 }
 export default employeeTable;

@@ -1,0 +1,17 @@
+{
+  "name": "vtsserver",
+  "version": "0.1.0",
+  "description": "Helmes VTS Server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev-start": "nodemon index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "express": "4.16.2",
+    "express-validation": "^1.0.2",
+    "joi": "^13.0.2"
+  }
+}

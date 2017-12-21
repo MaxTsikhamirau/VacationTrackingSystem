@@ -41,7 +41,7 @@ class App extends Component {
           'email': 'yuliya.tsikhamirava@helmes.ee',
           'groups': ['apac']
         }
-        
+
       ],
       id: '',
       firstName: '',
@@ -55,9 +55,11 @@ class App extends Component {
         total: 2,
         display: 2,
         number: 1,
+      },
+      errors: {
+        name: false,
+        email: true,
       }
-
-
     }
   }
   setTotal(event, total) {
@@ -71,7 +73,7 @@ class App extends Component {
         // eslint-disable-next-line no-param-reassign
         total = 0;
       }
- 
+
       this.setState({ total });
     }
   }
@@ -86,7 +88,7 @@ class App extends Component {
         // eslint-disable-next-line no-param-reassign
         display = 0;
       }
- 
+
       this.setState({ display });
     }
   }
@@ -111,7 +113,7 @@ class App extends Component {
   updateEmployeeHandler = (id) => {
     const { firstName, lastName, email } = this.state;
     var updatedEmployee = this.state.employees.find(employee =>
-      employee.id===(this.state.id));
+      employee.id === (this.state.id));
     updatedEmployee.email = this.state.email;
     updatedEmployee.firstName = this.state.firstName;
     updatedEmployee.lastName = this.state.lastName;
@@ -144,11 +146,74 @@ class App extends Component {
     this.setState({ group: value });
   }
 
-  render() {
+ 
+  validate() {
+    const{email}=this.state;
+    // true means invalid, so our conditions got reversed
+    return {
+      email: email.length === 0      
+    };
+  }
+
+  AddEmployeeComponent = () =>
+
+    <AddEmployee
+      addEmployee={this.addEmployeeHandler}
+      firstName={this.state.firstName}
+      lastName={this.state.lastName}
+      email={this.state.email}
+      id={this.state.id}
+      warning={this.state.warning}
+      change={this.changeEmployeeParamsHandler}
+      update={this.updateEmployeeHandler}
+      action={this.state.action}
+      validate={this.state.errors}
+    />
+
+  EmployeeTableComponent = () => {
     var filteredEmployees = (this.state.search === '') ? this.state.employees :
       this.state.employees.filter(employee =>
         employee.firstName.toLowerCase().includes(this.state.search));
+    return <EmployeeTable
+      header={[
+        {
+          name: 'Id',
+          props: 'id'
+        },
+        {
+          name: 'First Name',
+          props: 'firstName'
+        },
+        {
+          name: 'Last Name',
+          props: 'lastName'
+        },
+        {
+          name: 'Email',
+          props: 'email'
+        },
+        {
+          name: 'Groups',
+          props: 'groups'
+        }
+      ]}
 
+      list={filteredEmployees}
+      edit={this.editEmployeeHandler}
+      remove={this.removeEmployeeHandler}
+      search={this.searchEmployeeHandler}
+    />
+  }
+
+  PaginationComponent = () =>
+    <Pagination
+      total={this.state.pagination.total}
+      current={this.state.pagination.number}
+      display={this.state.pagination.display}
+      onChange={number => this.setState({ number })}
+    />
+
+  render() {
     return (
       <MuiThemeProvider>
         <div className="App" >
@@ -156,68 +221,11 @@ class App extends Component {
             <img src={logo} className="App-logo" alt="logo" />
             <h1 className="App-title">Welcome to React</h1>
           </header>
-
-          <AddEmployee
-            addEmployee={this.addEmployeeHandler}
-            firstName={this.state.firstName}
-            lastName={this.state.lastName}
-            email={this.state.email}
-            id={this.state.id}
-            warning={this.state.warning}
-            change={this.changeEmployeeParamsHandler}
-            update={this.updateEmployeeHandler}
-            action={this.state.action}
-          />
-          {/* <Employees
-            list={filteredEmployees}
-            edit={this.editEmployeeHandler}
-            remove={this.removeEmployeeHandler}
-            search={this.searchEmployeeHandler}
-          /> */}
-
-          <EmployeeTable
-            header={[
-              {
-                name: 'Id',
-                props: 'id'
-              },
-              {
-                name: 'First Name',
-                props: 'firstName'
-              },
-              {
-                name: 'Last Name',
-                props: 'lastName'
-              },
-              {
-                name: 'Email',
-                props: 'email'
-              },
-              {
-                name: 'Groups',
-                props: 'groups'
-              }
-            ]}
-
-            list={filteredEmployees}
-            edit={this.editEmployeeHandler}
-            remove={this.removeEmployeeHandler}
-            search={this.searchEmployeeHandler}
-          />
-
-          <Pagination
-
-            total={this.state.pagination.total}
-            current={this.state.pagination.number}
-            display={this.state.pagination.display}
-            onChange={number => this.setState({ number })}
-
-          />
-
+          <this.AddEmployeeComponent />
+          <this.EmployeeTableComponent />
         </div>
       </MuiThemeProvider>
     );
   }
 }
-
 export default App;
