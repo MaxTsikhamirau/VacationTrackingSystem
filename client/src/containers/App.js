@@ -9,38 +9,40 @@ import MultiSelectField from '../components/Multiselect/Multiselect';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import Pagination from 'material-ui-pagination';
+import { get, post, put, remove } from '../functions/server';
+import { Route, Switch } from 'react-router-dom';
+
+
 
 injectTapEventPlugin();
 class App extends Component {
 
   constructor(props) {
     super(props);
-    this.setTotal = this.setTotal.bind(this);
-    this.setDisplay = this.setDisplay.bind(this);
-
+   
     this.state = {
       employees: [
-        {
-          'id': '1',
-          'firstName': 'Maksim',
-          'lastName': 'Tsikhamirau',
-          'email': 'maksim.tsikhamirau@helmes.ee',
-          'groups': ['au', 'gas']
-        },
-        {
-          'id': '2',
-          'firstName': 'Daniil',
-          'lastName': 'Tsikhamirau',
-          'email': 'daniil.tsikhamirau@helmes.ee',
-          'groups': ['au', 'core']
-        },
-        {
-          'id': '3',
-          'firstName': 'Yuliya',
-          'lastName': 'Tsikhamirava',
-          'email': 'yuliya.tsikhamirava@helmes.ee',
-          'groups': ['apac']
-        }
+        // {
+        //   'id': '1',
+        //   'firstName': 'Maksim',
+        //   'lastName': 'Tsikhamirau',
+        //   'email': 'maksim.tsikhamirau@helmes.ee',
+        //   'groups': ['au', 'gas']
+        // },
+        // {
+        //   'id': '2',
+        //   'firstName': 'Daniil',
+        //   'lastName': 'Tsikhamirau',
+        //   'email': 'daniil.tsikhamirau@helmes.ee',
+        //   'groups': ['au', 'core']
+        // },
+        // {
+        //   'id': '3',
+        //   'firstName': 'Yuliya',
+        //   'lastName': 'Tsikhamirava',
+        //   'email': 'yuliya.tsikhamirava@helmes.ee',
+        //   'groups': ['apac']
+        // }
 
       ],
       id: '',
@@ -51,49 +53,19 @@ class App extends Component {
       search: '',
       warning: '',
       action: 'add',
-      pagination: {
-        total: 2,
-        display: 2,
-        number: 1,
-      },
-      errors: {
-        name: false,
-        email: true,
-      }
-    }
-  }
-  setTotal(event, total) {
-    // eslint-disable-next-line no-param-reassign
-    total = total.trim();
-    if (total.match(/^\d*$/)) {
-      if (total !== '') {
-        // eslint-disable-next-line no-param-reassign
-        total = parseInt(total, 10);
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        total = 0;
+
+      validation: {
+        email: ''
       }
 
-      this.setState({ total });
-    }
-  }
-  setDisplay(event, display) {
-    // eslint-disable-next-line no-param-reassign
-    display = display.trim();
-    if (display.match(/^\d*$/)) {
-      if (display !== '') {
-        // eslint-disable-next-line no-param-reassign
-        display = parseInt(display, 10);
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        display = 0;
-      }
-
-      this.setState({ display });
     }
   }
 
-  addEmployeeHandler = (event) => {
+  componentDidMount = () => {
+    this.updateEmployeesFromServer();
+  }
+
+  addEmployeeHandler = () => {
     var found = this.state.employees.find(employee =>
       employee.firstName.toLowerCase().includes(this.state.firstName));
     if (found) {
@@ -102,6 +74,9 @@ class App extends Component {
     else {
       const { id, firstName, lastName, email } = this.state;
       var newId = this.state.employees.length + 1;
+      const newEmployee = new EmployeeModel(newId.toString(), firstName, lastName, email);
+      console.log(newEmployee);      
+      post('employees', null, newEmployee, this.handleServerError);
       this.setState({
         employees: [...this.state.employees,
         { id: newId, firstName: firstName, lastName: lastName, email: email }], id: parseInt(newId) + 1
@@ -117,8 +92,20 @@ class App extends Component {
     updatedEmployee.email = this.state.email;
     updatedEmployee.firstName = this.state.firstName;
     updatedEmployee.lastName = this.state.lastName;
-
+    put(`employees/${id}`, null, updatedEmployee, this.handleServerError);
     this.setState({ employees: [...this.state.employees], action: 'add', id: '', firstName: '', lastName: '', email: '' })
+  }
+
+  handleServerError = (response) => {
+    if (response.status !== 'OK') {
+      this.updateEmployeesFromServer();
+    }
+  }
+
+  updateEmployeesFromServer = () => {
+    get('employees', null, (employees) => {
+      this.setState({ employees });
+    });
   }
 
   changeEmployeeParamsHandler = (event) => {
@@ -133,7 +120,8 @@ class App extends Component {
   }
 
   removeEmployeeHandler = (id) => {
-    const filtered = this.state.employees.filter(e => e.id !== id);
+    const filtered = this.state.employees.filter(e => e.id !== id); `employees/${id}`
+    remove(`employees/${id}`, null, this.handleServerError)
     this.setState({ employees: filtered })
   }
 
@@ -146,12 +134,12 @@ class App extends Component {
     this.setState({ group: value });
   }
 
- 
+
   validate() {
-    const{email}=this.state;
+    const { email } = this.state;
     // true means invalid, so our conditions got reversed
     return {
-      email: email.length === 0      
+      email: email.length === 0
     };
   }
 
@@ -205,14 +193,6 @@ class App extends Component {
     />
   }
 
-  PaginationComponent = () =>
-    <Pagination
-      total={this.state.pagination.total}
-      current={this.state.pagination.number}
-      display={this.state.pagination.display}
-      onChange={number => this.setState({ number })}
-    />
-
   render() {
     return (
       <MuiThemeProvider>
@@ -221,8 +201,10 @@ class App extends Component {
             <img src={logo} className="App-logo" alt="logo" />
             <h1 className="App-title">Welcome to React</h1>
           </header>
-          <this.AddEmployeeComponent />
-          <this.EmployeeTableComponent />
+          <Switch>
+            <Route exact path="/" component={this.EmployeeTableComponent} />
+            <Route exact path="/manage" component={this.AddEmployeeComponent} />
+          </Switch>
         </div>
       </MuiThemeProvider>
     );

@@ -1,12 +1,12 @@
 class EmployeeModel {
-    constructor(id, first_name, last_name, email) {
+    constructor(id, firstName, lastName, email) {
         this.id = id;
-        this.first_name = first_name;
-        this.last_name = last_name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
     }
 
-    validate = () => this.id && this.first_name && this.last_name && this.email;
+    // validate = () => this.id && this.firstName && this.lastName && this.email;
 }
 
 export default EmployeeModel;
