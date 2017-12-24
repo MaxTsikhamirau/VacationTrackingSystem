@@ -14,12 +14,13 @@ import { Route, Switch } from 'react-router-dom';
 
 
 
+
 injectTapEventPlugin();
 class App extends Component {
 
   constructor(props) {
     super(props);
-   
+
     this.state = {
       employees: [
         // {
@@ -54,8 +55,10 @@ class App extends Component {
       warning: '',
       action: 'add',
 
-      validation: {
-        email: ''
+      inputError: {
+        email: '',
+        firstName: '',
+        lastName: ''
       }
 
     }
@@ -75,7 +78,7 @@ class App extends Component {
       const { id, firstName, lastName, email } = this.state;
       var newId = this.state.employees.length + 1;
       const newEmployee = new EmployeeModel(newId.toString(), firstName, lastName, email);
-      console.log(newEmployee);      
+      console.log(newEmployee);
       post('employees', null, newEmployee, this.handleServerError);
       this.setState({
         employees: [...this.state.employees,
@@ -110,7 +113,30 @@ class App extends Component {
 
   changeEmployeeParamsHandler = (event) => {
     this.setState({ [event.target.name]: event.target.value, warning: '' });
+    this.validateInputParams(event.target.name, event.target.value);
+
   }
+
+  validateInputParams = (name, value) => {
+    let isValid = true;
+    switch (name) {
+      case 'email':
+        let errorMessage = (value.includes('@')) ? '' : 'Wrong email'
+        this.setState({ inputError: { email: errorMessage } });
+        break;
+      case 'firstName':
+
+        errorMessage = (/^[a-zA-Z ]+$/.test(value)) ? '' : 'Wrong firstName'
+        this.setState({ inputError: { firstName: errorMessage } });
+        break;
+      case 'lastName':
+        errorMessage = (/^[a-zA-Z ]+$/.test(value)) ? '' : 'Wrong lastName'
+        this.setState({ inputError: { lastName: errorMessage } });
+        break;
+    }
+
+  }
+
 
   editEmployeeHandler = (id) => {
     const found = this.state.employees.find(e => e.id === id);
@@ -156,6 +182,7 @@ class App extends Component {
       update={this.updateEmployeeHandler}
       action={this.state.action}
       validate={this.state.errors}
+      inputError={this.state.inputError}
     />
 
   EmployeeTableComponent = () => {
