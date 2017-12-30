@@ -1,1 +1,20 @@
 .error { border: 1px solid red; }
+.correct{}
+RaisedButton {
+    color:  red
+}
+
+.addButton{
+    color: blue
+}
+
+.addButton { border: 1px solid red; }
+
+form{
+    width: 30%;
+    margin-left:35%;
+    margin-right:35%;
+    border: 1px solid cornflowerblue;
+}
+
+

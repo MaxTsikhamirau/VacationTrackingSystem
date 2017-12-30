@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import logo from '../logo.svg';
+import logo from '../assets/logo.svg';
 import '../containers/App.css';
 import Employees from '../components/Employees/Employees';
 import EmployeeTable from '../components/EmployeeTable/EmployeeTable';
@@ -10,8 +10,8 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import Pagination from 'material-ui-pagination';
 import { get, post, put, remove } from '../functions/server';
-import { Route, Switch } from 'react-router-dom';
-
+import { Route, Link, Switch } from 'react-router-dom';
+import ActionBar from '../components/ActionBar/ActionBar';
 
 
 
@@ -88,6 +88,10 @@ class App extends Component {
     this.setState({ firstName: '', lastName: '', email: '', id: '' })
   }
 
+  cancelHandler = () => {
+    this.setState({ firstName: '', lastName: '', email: '', warning: '', inputError: { firstName: '', lastName: '', email: '' } })
+  }
+
   updateEmployeeHandler = (id) => {
     const { firstName, lastName, email } = this.state;
     var updatedEmployee = this.state.employees.find(employee =>
@@ -116,9 +120,8 @@ class App extends Component {
     this.validateInputParams(event.target.name, event.target.value);
 
   }
-
+/*How to save previous state of other fields?*/
   validateInputParams = (name, value) => {
-    let isValid = true;
     switch (name) {
       case 'email':
         let errorMessage = (value.includes('@')) ? '' : 'Wrong email'
@@ -134,9 +137,7 @@ class App extends Component {
         this.setState({ inputError: { lastName: errorMessage } });
         break;
     }
-
   }
-
 
   editEmployeeHandler = (id) => {
     const found = this.state.employees.find(e => e.id === id);
@@ -158,20 +159,17 @@ class App extends Component {
   handleMultiSelectChange(value) {
     console.log('You\'ve selected:', value);
     this.setState({ group: value });
-  }
+  } 
 
+/*to get user from server it should be fetched in life-cycle method ..DidMount() if component is a function should it be implemented as a class(to have state and so on...)?*/
 
-  validate() {
-    const { email } = this.state;
-    // true means invalid, so our conditions got reversed
-    return {
-      email: email.length === 0
-    };
-  }
+  // fetchEmployee:(id)=>{
 
-  AddEmployeeComponent = () =>
+  // }
 
-    <AddEmployee
+  AddEmployeeComponent = (props) =>
+
+    <AddEmployee {...this.props}
       addEmployee={this.addEmployeeHandler}
       firstName={this.state.firstName}
       lastName={this.state.lastName}
@@ -183,13 +181,14 @@ class App extends Component {
       action={this.state.action}
       validate={this.state.errors}
       inputError={this.state.inputError}
+      cancel={this.cancelHandler}
     />
 
-  EmployeeTableComponent = () => {
+  EmployeeTableComponent = (props) => {
     var filteredEmployees = (this.state.search === '') ? this.state.employees :
       this.state.employees.filter(employee =>
         employee.firstName.toLowerCase().includes(this.state.search));
-    return <EmployeeTable
+    return <EmployeeTable {...this.props}
       header={[
         {
           name: 'Id',
@@ -225,12 +224,14 @@ class App extends Component {
       <MuiThemeProvider>
         <div className="App" >
           <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />
-            <h1 className="App-title">Welcome to React</h1>
+            <img src={logo} className="App-logo" alt="logo" />                    
           </header>
+          <ActionBar
+           search={this.searchEmployeeHandler}/>
           <Switch>
             <Route exact path="/" component={this.EmployeeTableComponent} />
             <Route exact path="/manage" component={this.AddEmployeeComponent} />
+            <Route exact path="/manage/:id" component={this.AddEmployeeComponent} />
           </Switch>
         </div>
       </MuiThemeProvider>
@@ -238,3 +239,4 @@ class App extends Component {
   }
 }
 export default App;
+

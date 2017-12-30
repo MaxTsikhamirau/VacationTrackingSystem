@@ -11,10 +11,13 @@ import {
 import FlatButton from 'material-ui/FlatButton';
 import FontIcon from 'material-ui/FontIcon';
 import Pagination from 'material-ui-pagination';
-import { Link } from 'react-router-dom';
+import { Link, Route } from 'react-router-dom';
+import { Delete, ModeEdit, PersonAdd } from 'material-ui-icons';
+
 
 
 const employeeTable = (props) => {
+    console.log(props);
 
     const row = props.list.map(employee => (
 
@@ -35,19 +38,22 @@ const employeeTable = (props) => {
                 {employee.groups}
             </TableRowColumn>
             <TableRowColumn>
-                {/* <FlatButton
-                    backgroundColor="#a4c639"
-                    hoverColor="#8AA62F"
-                    style={style}
-                /> */}
-                <button name='Edit' classNmame='btn btn-lg btn-success' onClick={props.edit.bind(this, employee.id)}>Edit</button>
-                <button name='Remove' classNmame='btn btn-lg btn-success' onClick={props.remove.bind(this, employee.id)}>Remove</button>
+
+
+
+
+                <Link to={`manage/${employee.id}`}>
+                    <ModeEdit name='Edit' onClick={props.edit.bind(this, employee.id)} />
+
+                </Link>
+                <Delete name='Remove' onClick={props.remove.bind(this, employee.id)} />
+
             </TableRowColumn>
         </TableRow>
     ));
     return (<div>
         <Link to='/manage'>
-            <button name='Add' classNmame='btn btn-lg btn-success' >Add</button>
+            <PersonAdd />
         </Link>
         <Table>
             <TableHeader>
@@ -58,7 +64,9 @@ const employeeTable = (props) => {
                         </TableHeaderColumn>)}
                 </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody
+                stripedRows
+                showRowHover>
                 {row}
 
             </TableBody>
