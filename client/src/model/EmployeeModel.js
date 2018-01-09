@@ -5,6 +5,7 @@ class EmployeeModel {
         this.lastName = lastName;
         this.email = email;
     }
+    
 
     // validate = () => this.id && this.firstName && this.lastName && this.email;
 }

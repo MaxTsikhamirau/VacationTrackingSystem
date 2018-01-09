@@ -22,30 +22,9 @@ class App extends Component {
     super(props);
 
     this.state = {
-      employees: [
-        // {
-        //   'id': '1',
-        //   'firstName': 'Maksim',
-        //   'lastName': 'Tsikhamirau',
-        //   'email': 'maksim.tsikhamirau@helmes.ee',
-        //   'groups': ['au', 'gas']
-        // },
-        // {
-        //   'id': '2',
-        //   'firstName': 'Daniil',
-        //   'lastName': 'Tsikhamirau',
-        //   'email': 'daniil.tsikhamirau@helmes.ee',
-        //   'groups': ['au', 'core']
-        // },
-        // {
-        //   'id': '3',
-        //   'firstName': 'Yuliya',
-        //   'lastName': 'Tsikhamirava',
-        //   'email': 'yuliya.tsikhamirava@helmes.ee',
-        //   'groups': ['apac']
-        // }
-
-      ],
+      employees: [],
+      firstNewId: '',
+      lastCreatedId: '',
       id: '',
       firstName: '',
       lastName: '',
@@ -54,12 +33,10 @@ class App extends Component {
       search: '',
       warning: '',
       action: 'add',
+      inputEmailError: '',
+      inputFirstNameError: '',
+      inputLastNameError: ''
 
-      inputError: {
-        email: '',
-        firstName: '',
-        lastName: ''
-      }
 
     }
   }
@@ -75,17 +52,27 @@ class App extends Component {
       this.setState({ warning: 'User with such name already exists' })
     }
     else {
-      const { id, firstName, lastName, email } = this.state;
-      var newId = this.state.employees.length + 1;
-      const newEmployee = new EmployeeModel(newId.toString(), firstName, lastName, email);
-      console.log(newEmployee);
+      const { id, firstName, lastName, email, firstNewId } = this.state;
+      const lastCreatedId = this.state.lastCreatedId;
+      console.log("id:" + id + " firstNewId:" + firstNewId + " lastCreatedId:" + lastCreatedId);
+      let newEmployee = new EmployeeModel();
+      if (lastCreatedId === '') {
+        newEmployee = new EmployeeModel(firstNewId.toString(), firstName, lastName, email);
+        this.setState({
+          employees: [...this.state.employees,
+          { id: firstNewId, firstName: firstName, lastName: lastName, email: email }], lastCreatedId: firstNewId
+        });
+      } else {
+        newEmployee = new EmployeeModel((parseInt(lastCreatedId) + 1).toString(), firstName, lastName, email);
+        this.setState({
+          employees: [...this.state.employees,
+          { id: parseInt(lastCreatedId) + 1, firstName: firstName, lastName: lastName, email: email }], lastCreatedId: (parseInt(lastCreatedId) + 1)
+        });
+
+      }
       post('employees', null, newEmployee, this.handleServerError);
-      this.setState({
-        employees: [...this.state.employees,
-        { id: newId, firstName: firstName, lastName: lastName, email: email }], id: parseInt(newId) + 1
-      });
     }
-    this.setState({ firstName: '', lastName: '', email: '', id: '' })
+    this.setState({ firstName: '', lastName: '', email: '' });
   }
 
   cancelHandler = () => {
@@ -111,7 +98,7 @@ class App extends Component {
 
   updateEmployeesFromServer = () => {
     get('employees', null, (employees) => {
-      this.setState({ employees });
+      this.setState({ employees, firstNewId: employees.length + 1 });
     });
   }
 
@@ -120,21 +107,24 @@ class App extends Component {
     this.validateInputParams(event.target.name, event.target.value);
 
   }
-/*How to save previous state of other fields?*/
+  /*How to save previous state of other fields?*/
   validateInputParams = (name, value) => {
     switch (name) {
       case 'email':
         let errorMessage = (value.includes('@')) ? '' : 'Wrong email'
-        this.setState({ inputError: { email: errorMessage } });
+        this.setState({ inputEmailError: errorMessage })
+        console.log(errorMessage);
         break;
       case 'firstName':
-
+        console.log(name, value);
         errorMessage = (/^[a-zA-Z ]+$/.test(value)) ? '' : 'Wrong firstName'
-        this.setState({ inputError: { firstName: errorMessage } });
+        this.setState({ inputFirstNameError: errorMessage });
+        console.log(errorMessage);
         break;
       case 'lastName':
         errorMessage = (/^[a-zA-Z ]+$/.test(value)) ? '' : 'Wrong lastName'
-        this.setState({ inputError: { lastName: errorMessage } });
+        this.setState({ inputLastNameError: errorMessage });
+        console.log(errorMessage);
         break;
     }
   }
@@ -159,13 +149,22 @@ class App extends Component {
   handleMultiSelectChange(value) {
     console.log('You\'ve selected:', value);
     this.setState({ group: value });
-  } 
+  }
 
-/*to get user from server it should be fetched in life-cycle method ..DidMount() if component is a function should it be implemented as a class(to have state and so on...)?*/
+  /*to get user from server it should be fetched in life-cycle method ..DidMount() if component is a function should it be implemented as a class(to have state and so on...)?*/
 
-  // fetchEmployee:(id)=>{
+  // fetchEmployee=(id)=>{
 
   // }
+
+  obj = {
+    param: '',
+    param2: {},
+    param3: [],
+    func: () => { }
+  }
+
+  func = () => { }
 
   AddEmployeeComponent = (props) =>
 
@@ -179,8 +178,9 @@ class App extends Component {
       change={this.changeEmployeeParamsHandler}
       update={this.updateEmployeeHandler}
       action={this.state.action}
-      validate={this.state.errors}
-      inputError={this.state.inputError}
+      inputEmailError={this.state.inputEmailError}
+      inputFirstNameError={this.state.inputFirstNameError}
+      inputLastNameError={this.state.inputLastNameError}
       cancel={this.cancelHandler}
     />
 
@@ -224,10 +224,10 @@ class App extends Component {
       <MuiThemeProvider>
         <div className="App" >
           <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />                    
+            <img src={logo} className="App-logo" alt="logo" />
           </header>
           <ActionBar
-           search={this.searchEmployeeHandler}/>
+            search={this.searchEmployeeHandler} />
           <Switch>
             <Route exact path="/" component={this.EmployeeTableComponent} />
             <Route exact path="/manage" component={this.AddEmployeeComponent} />

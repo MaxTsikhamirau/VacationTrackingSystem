@@ -12,7 +12,7 @@ const addEmployee = (props) => {
         console.error(props.warning);
     }
     console.log(props);
-    const isValid = (props.inputError.email || props.inputError.firstName || props.inputError.lastName) ? false : true;
+    const isValid = (props.inputEmailError || props.inputFirstNameError || props.inputLastNameError) ? false : true;
     return (
         <form>
             <div>{props.warning}</div>
@@ -20,14 +20,14 @@ const addEmployee = (props) => {
                 type='text'
                 name='firstName'
                 value={props.firstName}
-                className={props.inputError.firstName ? "error" : "correct"}
+                className={props.inputFirstNameError ? "error" : "correct"}
                 onChange={props.change}
                 floatingLabelText="First Name" /><br />
             <TextField
                 type='text'
                 name='lastName'
                 value={props.lastName}
-                className={props.inputError.lastName ? "error" : "correct"}
+                className={props.inputLastNameError ? "error" : "correct"}
                 onChange={props.change}
                 floatingLabelText="Last Name" /><br />
 
@@ -35,7 +35,7 @@ const addEmployee = (props) => {
                 type='text'
                 name='email'
                 value={props.email}
-                className={props.inputError.email ? "error" : "correct"}
+                className={props.inputEmailError ? "error" : "correct"}
                 onChange={props.change}
                 floatingLabelText="Email" /><br />
 
