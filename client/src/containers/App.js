@@ -12,6 +12,7 @@ import Pagination from 'material-ui-pagination';
 import { get, post, put, remove } from '../functions/server';
 import { Route, Link, Switch } from 'react-router-dom';
 import ActionBar from '../components/ActionBar/ActionBar';
+import { fetchEmployeeAction, updateEmployeeAction, removeEmployeeAction, addEmployeeAction } from '../reducers/EmployeeActions'
 
 
 
@@ -22,7 +23,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      employees: [],
+
       firstNewId: '',
       lastCreatedId: '',
       id: '',
@@ -42,37 +43,46 @@ class App extends Component {
   }
 
   componentDidMount = () => {
+    this.unsubscribe = this.props.store.subscribe(() => { this.forceUpdate() });
     this.updateEmployeesFromServer();
   }
 
-  addEmployeeHandler = () => {
-    var found = this.state.employees.find(employee =>
-      employee.firstName.toLowerCase().includes(this.state.firstName));
-    if (found) {
-      this.setState({ warning: 'User with such name already exists' })
-    }
-    else {
-      const { id, firstName, lastName, email, firstNewId } = this.state;
-      const lastCreatedId = this.state.lastCreatedId;
-      console.log("id:" + id + " firstNewId:" + firstNewId + " lastCreatedId:" + lastCreatedId);
-      let newEmployee = new EmployeeModel();
-      if (lastCreatedId === '') {
-        newEmployee = new EmployeeModel(firstNewId.toString(), firstName, lastName, email);
-        this.setState({
-          employees: [...this.state.employees,
-          { id: firstNewId, firstName: firstName, lastName: lastName, email: email }], lastCreatedId: firstNewId
-        });
-      } else {
-        newEmployee = new EmployeeModel((parseInt(lastCreatedId) + 1).toString(), firstName, lastName, email);
-        this.setState({
-          employees: [...this.state.employees,
-          { id: parseInt(lastCreatedId) + 1, firstName: firstName, lastName: lastName, email: email }], lastCreatedId: (parseInt(lastCreatedId) + 1)
-        });
+  componentWillUnmount = () => {
+    this.unsubscribe()
+  }
 
-      }
+  clean = () => {
+
+  }
+
+  ifExist = () => {
+    return this.props.store.getState().find(employee =>
+      employee.firstName.toLowerCase().includes(this.state.firstName));
+  }
+
+  addEmployeeHandler = () => {
+    if (!this.ifExist()) {
+      const { firstName, lastName, email } = this.state;
+      const newEmployee = new EmployeeModel(this.getUniqueId().toString(), firstName, lastName, email);
+      this.props.store.dispatch(addEmployeeAction(newEmployee))
       post('employees', null, newEmployee, this.handleServerError);
     }
+    else {
+      this.setState({ warning: 'User with such name already exists' })
+    }
     this.setState({ firstName: '', lastName: '', email: '' });
+  }
+
+  getUniqueId = () => {
+    const { firstNewId, lastCreatedId } = this.state;
+    console.log(" firstNewId:" + firstNewId + " lastCreatedId:" + lastCreatedId);
+    if (lastCreatedId === '') {
+      this.setState({ lastCreatedId: firstNewId });
+      return firstNewId;
+    } else {
+      this.setState({ lastCreatedId: (parseInt(lastCreatedId) + 1) });
+      return parseInt(lastCreatedId) + 1;
+    }
   }
 
   cancelHandler = () => {
@@ -81,13 +91,10 @@ class App extends Component {
 
   updateEmployeeHandler = (id) => {
     const { firstName, lastName, email } = this.state;
-    var updatedEmployee = this.state.employees.find(employee =>
-      employee.id === (this.state.id));
-    updatedEmployee.email = this.state.email;
-    updatedEmployee.firstName = this.state.firstName;
-    updatedEmployee.lastName = this.state.lastName;
+    const updatedEmployee = new EmployeeModel(id, firstName, lastName, email);
     put(`employees/${id}`, null, updatedEmployee, this.handleServerError);
-    this.setState({ employees: [...this.state.employees], action: 'add', id: '', firstName: '', lastName: '', email: '' })
+    this.props.store.dispatch(updateEmployeeAction(updatedEmployee))
+    this.setState({ action: 'add', id: '', firstName: '', lastName: '', email: '' })
   }
 
   handleServerError = (response) => {
@@ -98,8 +105,10 @@ class App extends Component {
 
   updateEmployeesFromServer = () => {
     get('employees', null, (employees) => {
-      this.setState({ employees, firstNewId: employees.length + 1 });
+      this.props.store.dispatch(fetchEmployeeAction(employees))
+      this.setState({ firstNewId: employees.length + 1 });
     });
+    console.log(this.props.store.getState())
   }
 
   changeEmployeeParamsHandler = (event) => {
@@ -107,7 +116,7 @@ class App extends Component {
     this.validateInputParams(event.target.name, event.target.value);
 
   }
-  /*How to save previous state of other fields?*/
+
   validateInputParams = (name, value) => {
     switch (name) {
       case 'email':
@@ -130,16 +139,16 @@ class App extends Component {
   }
 
   editEmployeeHandler = (id) => {
-    const found = this.state.employees.find(e => e.id === id);
+    const found = this.props.store.getState().find(e => e.id === id);
+    console.log(found)
     if (found) {
       this.setState({ ...found, action: 'update' });
     }
   }
 
   removeEmployeeHandler = (id) => {
-    const filtered = this.state.employees.filter(e => e.id !== id); `employees/${id}`
+    this.props.store.dispatch(removeEmployeeAction(id));
     remove(`employees/${id}`, null, this.handleServerError)
-    this.setState({ employees: filtered })
   }
 
   searchEmployeeHandler = (event) => {
@@ -150,24 +159,7 @@ class App extends Component {
     console.log('You\'ve selected:', value);
     this.setState({ group: value });
   }
-
-  /*to get user from server it should be fetched in life-cycle method ..DidMount() if component is a function should it be implemented as a class(to have state and so on...)?*/
-
-  // fetchEmployee=(id)=>{
-
-  // }
-
-  obj = {
-    param: '',
-    param2: {},
-    param3: [],
-    func: () => { }
-  }
-
-  func = () => { }
-
   AddEmployeeComponent = (props) =>
-
     <AddEmployee {...this.props}
       addEmployee={this.addEmployeeHandler}
       firstName={this.state.firstName}
@@ -185,9 +177,10 @@ class App extends Component {
     />
 
   EmployeeTableComponent = (props) => {
-    var filteredEmployees = (this.state.search === '') ? this.state.employees :
-      this.state.employees.filter(employee =>
-        employee.firstName.toLowerCase().includes(this.state.search));
+    var filteredEmployees = (this.state.search === '') ? this.props.store.getState() :
+      this.props.store.getState().filter(employee =>
+        employee.firstName.toLowerCase().includes(this.state.search) || employee.lastName.toLowerCase().includes(this.state.search));
+    console.log(filteredEmployees)
     return <EmployeeTable {...this.props}
       header={[
         {
@@ -222,6 +215,7 @@ class App extends Component {
   render() {
     return (
       <MuiThemeProvider>
+
         <div className="App" >
           <header className="App-header">
             <img src={logo} className="App-logo" alt="logo" />

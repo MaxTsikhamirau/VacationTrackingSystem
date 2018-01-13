@@ -24,7 +24,7 @@ export default class ActionBar extends React.Component {
 
     render() {
         return (
-            <Toolbar>
+            <Toolbar style={{backgroundcolor:'1318c8'}} >
                 <ToolbarGroup firstChild={true}>
                     <DropDownMenu value={this.state.value} onChange={this.handleChange}>
                         <MenuItem value={1} primaryText="Test_1" />
@@ -38,13 +38,8 @@ export default class ActionBar extends React.Component {
                 <ToolbarGroup>
                     <ToolbarTitle text="Navigation Menu" />
                     <FontIcon className="muidocs-icon-custom-sort" />
-                    <ToolbarSeparator />
-                    <Badge
-                        badgeContent={4}
-                        primary={true}
-                    >
-                        <NotificationsIcon />
-                    </Badge>
+                    <ToolbarSeparator />               
+                       
                     <Badge
                         badgeContent={10}
                         secondary={true}

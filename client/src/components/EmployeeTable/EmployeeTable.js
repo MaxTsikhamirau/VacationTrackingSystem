@@ -53,7 +53,7 @@ const employeeTable = (props) => {
     ));
     return (<div>
         <Link to='/manage'>
-            <PersonAdd />
+        <FlatButton backgroundColor='#1318c8' label='Add'/>
         </Link>
         <Table>
             <TableHeader>

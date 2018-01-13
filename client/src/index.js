@@ -3,15 +3,18 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './containers/App';
 import registerServiceWorker from './registerServiceWorker';
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap/dist/css/bootstrap-theme.css';
 import { BrowserRouter, Route } from 'react-router-dom'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import appStore from './reducers/AppStore';
+import employeeReducer from './reducers/EmployeeReducer';
+import { createStore } from 'redux';
+
+const store = createStore(employeeReducer);
+
 
 ReactDOM.render(
     (
         <BrowserRouter>
-            <Route path="/" component={App} />
+            <App store={store}/>
         </BrowserRouter>
-), document.getElementById('root'));
+    ), document.getElementById('root'));
 registerServiceWorker();
