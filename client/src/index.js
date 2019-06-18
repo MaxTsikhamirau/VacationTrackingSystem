@@ -7,14 +7,16 @@ import { BrowserRouter, Route } from 'react-router-dom'
 import appStore from './reducers/AppStore';
 import employeeReducer from './reducers/EmployeeReducer';
 import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import PropTypes from 'prop-types';
 
-const store = createStore(employeeReducer);
-
+const store = createStore(appStore);
 
 ReactDOM.render(
-    (
+    <Provider store={store}>
         <BrowserRouter>
-            <App store={store}/>
+            <Route component={App} />
         </BrowserRouter>
-    ), document.getElementById('root'));
+    </Provider>
+    , document.getElementById('root'));
 registerServiceWorker();

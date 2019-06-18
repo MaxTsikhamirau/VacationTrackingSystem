@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import RaisedButton from 'material-ui/RaisedButton';
 import {
     Table,
@@ -13,12 +14,11 @@ import FontIcon from 'material-ui/FontIcon';
 import Pagination from 'material-ui-pagination';
 import { Link, Route } from 'react-router-dom';
 import { Delete, ModeEdit, PersonAdd } from 'material-ui-icons';
-import { connect } from 'react-redux';
-import { fetchEmployeeAction, updateEmployeeAction, removeEmployeeAction, addEmployeeAction } from '../../reducers/EmployeeActions';
-import { get, post, put, remove } from '../../functions/server';
+import { fetchEmployeeAction, updateEmployeeAction, removeEmployeeAction } from '../../reducers/EmployeeActions';
+import { get, remove } from '../../functions/server';
 
 
-class EmployeeTable extends React.Component {
+class e2 extends React.Component {
 
     constructor(props) {
         super(props);
@@ -42,14 +42,17 @@ class EmployeeTable extends React.Component {
         this.setState({ search: event.target.value.toLowerCase() });
     }
 
-  
+    removeEmployeeHandler = (id) => {
+        this.props.dispatch(removeEmployeeAction(id));
+        remove(`employees/${id}`, null, this.handleServerError)
+    }
 
     render() {
-        // const filteredEmployees = (this.state.search === '') ? this.props.store :
-        //     this.props.store.filter(employee =>
-        //         employee.firstName.toLowerCase().includes(this.state.search) || employee.lastName.toLowerCase().includes(this.state.search));
-
-        const row = this.props.list.map(employee => (
+        const filteredEmployees = (this.state.search === '') ? this.props.employees :
+            this.props.employees.filter(employee =>
+                employee.firstName.toLowerCase().includes(this.state.search) || employee.lastName.toLowerCase().includes(this.state.search));
+                console.log(this.props.employees)
+        const row = this.props.employees.map(employee => (
 
             <TableRow key={employee.id}>
                 <TableRowColumn>
@@ -69,12 +72,35 @@ class EmployeeTable extends React.Component {
                 </TableRowColumn>
                 <TableRowColumn>
                     <Link to={`manage/${employee.id}`}>
-                        {/* <ModeEdit name='Edit' onClick={this.props.dispatch(updateEmployeeAction(employee.id))} /> */}
+                        {/* <ModeEdit name='Edit' onClick={this.updateEmployeeHandler.bind(this, employee.id)} /> */}
                     </Link>
-                    {/* <Delete name='Remove' onClick={this.props.dispatch(removeEmployeeAction(employee.id))} /> */}
+                    {/* <Delete name='Remove' onClick={() => this.removeEmployeeHandler(employee.id)} /> */}
                 </TableRowColumn>
             </TableRow>
-        ));
+        ))
+
+        const header = [
+            {
+                name: 'Id',
+                props: 'id'
+            },
+            {
+                name: 'First Name',
+                props: 'firstName'
+            },
+            {
+                name: 'Last Name',
+                props: 'lastName'
+            },
+            {
+                name: 'Email',
+                props: 'email'
+            },
+            {
+                name: 'Groups',
+                props: 'groups'
+            }
+        ];
         return (<div>
             <Link to='/manage'>
                 <FlatButton backgroundColor='#1318c8' label='Add' />
@@ -82,7 +108,7 @@ class EmployeeTable extends React.Component {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        {this.props.header.map((x, i) =>
+                        {header.map((x, i) =>
                             <TableHeaderColumn key={i}>
                                 {x.name}
                             </TableHeaderColumn>)}
@@ -98,9 +124,10 @@ class EmployeeTable extends React.Component {
         </div>)
     }
 }
-export default 
-// connect(
-//     (store) => ({ store }),
-//     (dispatch) => ({ dispatch }))
-    (EmployeeTable);
+export default connect(
 
+    store => ({
+        employees: store.employees
+    }),
+    dispatch => ({ dispatch })
+)(e2)

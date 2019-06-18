@@ -13,6 +13,9 @@ import { get, post, put, remove } from '../functions/server';
 import { Route, Link, Switch } from 'react-router-dom';
 import ActionBar from '../components/ActionBar/ActionBar';
 import { fetchEmployeeAction, updateEmployeeAction, removeEmployeeAction, addEmployeeAction } from '../reducers/EmployeeActions'
+import ManageEmployee from '../components/ManageEmployee/ManageEmployee'
+import { connect } from 'react-redux';
+import E2 from '../components/EmployeeTable/e2'
 
 
 
@@ -21,167 +24,22 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-
-    this.state = {
-
-      firstNewId: '',
-      lastCreatedId: '',
-      id: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      group: '',
-      search: '',
-      warning: '',
-      action: 'add',
-      inputEmailError: '',
-      inputFirstNameError: '',
-      inputLastNameError: ''
-
-
-    }
   }
 
   componentDidMount = () => {
-    this.unsubscribe = this.props.store.subscribe(() => { this.forceUpdate() });
     this.updateEmployeesFromServer();
-  }
-
-  componentWillUnmount = () => {
-    this.unsubscribe()
-  }
-
-  clean = () => {
-
-  }
-
-  ifExist = () => {
-    return this.props.store.getState().find(employee =>
-      employee.firstName.toLowerCase().includes(this.state.firstName));
-  }
-
-  addEmployeeHandler = () => {
-    if (!this.ifExist()) {
-      const { firstName, lastName, email } = this.state;
-      const newEmployee = new EmployeeModel(this.getUniqueId().toString(), firstName, lastName, email);
-      this.props.store.dispatch(addEmployeeAction(newEmployee))
-      post('employees', null, newEmployee, this.handleServerError);
-    }
-    else {
-      this.setState({ warning: 'User with such name already exists' })
-    }
-    this.setState({ firstName: '', lastName: '', email: '' });
-  }
-
-  getUniqueId = () => {
-    const { firstNewId, lastCreatedId } = this.state;
-    console.log(" firstNewId:" + firstNewId + " lastCreatedId:" + lastCreatedId);
-    if (lastCreatedId === '') {
-      this.setState({ lastCreatedId: firstNewId });
-      return firstNewId;
-    } else {
-      this.setState({ lastCreatedId: (parseInt(lastCreatedId) + 1) });
-      return parseInt(lastCreatedId) + 1;
-    }
-  }
-
-  cancelHandler = () => {
-    this.setState({ firstName: '', lastName: '', email: '', warning: '', inputError: { firstName: '', lastName: '', email: '' } })
-  }
-
-  updateEmployeeHandler = (id) => {
-    const { firstName, lastName, email } = this.state;
-    const updatedEmployee = new EmployeeModel(id, firstName, lastName, email);
-    put(`employees/${id}`, null, updatedEmployee, this.handleServerError);
-    this.props.store.dispatch(updateEmployeeAction(updatedEmployee))
-    this.setState({ action: 'add', id: '', firstName: '', lastName: '', email: '' })
-  }
-
-  handleServerError = (response) => {
-    if (response.status !== 'OK') {
-      this.updateEmployeesFromServer();
-    }
   }
 
   updateEmployeesFromServer = () => {
     get('employees', null, (employees) => {
-      this.props.store.dispatch(fetchEmployeeAction(employees))
-      this.setState({ firstNewId: employees.length + 1 });
+      this.props.dispatch(fetchEmployeeAction(employees))
+      console.log(this.props.store)
     });
-    console.log(this.props.store.getState())
+    
   }
 
-  changeEmployeeParamsHandler = (event) => {
-    this.setState({ [event.target.name]: event.target.value, warning: '' });
-    this.validateInputParams(event.target.name, event.target.value);
-
-  }
-
-  validateInputParams = (name, value) => {
-    switch (name) {
-      case 'email':
-        let errorMessage = (value.includes('@')) ? '' : 'Wrong email'
-        this.setState({ inputEmailError: errorMessage })
-        console.log(errorMessage);
-        break;
-      case 'firstName':
-        console.log(name, value);
-        errorMessage = (/^[a-zA-Z ]+$/.test(value)) ? '' : 'Wrong firstName'
-        this.setState({ inputFirstNameError: errorMessage });
-        console.log(errorMessage);
-        break;
-      case 'lastName':
-        errorMessage = (/^[a-zA-Z ]+$/.test(value)) ? '' : 'Wrong lastName'
-        this.setState({ inputLastNameError: errorMessage });
-        console.log(errorMessage);
-        break;
-    }
-  }
-
-  editEmployeeHandler = (id) => {
-    const found = this.props.store.getState().find(e => e.id === id);
-    console.log(found)
-    if (found) {
-      this.setState({ ...found, action: 'update' });
-    }
-  }
-
-  removeEmployeeHandler = (id) => {
-    this.props.store.dispatch(removeEmployeeAction(id));
-    remove(`employees/${id}`, null, this.handleServerError)
-  }
-
-  searchEmployeeHandler = (event) => {
-    this.setState({ search: event.target.value.toLowerCase() });
-  }
-
-  handleMultiSelectChange(value) {
-    console.log('You\'ve selected:', value);
-    this.setState({ group: value });
-  }
-  AddEmployeeComponent = (props) =>
-    <AddEmployee {...this.props}
-      addEmployee={this.addEmployeeHandler}
-      firstName={this.state.firstName}
-      lastName={this.state.lastName}
-      email={this.state.email}
-      id={this.state.id}
-      warning={this.state.warning}
-      change={this.changeEmployeeParamsHandler}
-      update={this.updateEmployeeHandler}
-      action={this.state.action}
-      inputEmailError={this.state.inputEmailError}
-      inputFirstNameError={this.state.inputFirstNameError}
-      inputLastNameError={this.state.inputLastNameError}
-      cancel={this.cancelHandler}
-    />
-
-  EmployeeTableComponent = (props) => {
-    var filteredEmployees = (this.state.search === '') ? this.props.store.getState() :
-      this.props.store.getState().filter(employee =>
-        employee.firstName.toLowerCase().includes(this.state.search) || employee.lastName.toLowerCase().includes(this.state.search));
-    console.log(filteredEmployees)
-    return <EmployeeTable {...this.props}
+  E2Component = (props) => {    
+    return <E2 {...this.props}
       header={[
         {
           name: 'Id',
@@ -203,12 +61,7 @@ class App extends Component {
           name: 'Groups',
           props: 'groups'
         }
-      ]}
-
-      list={filteredEmployees}
-      edit={this.editEmployeeHandler}
-      remove={this.removeEmployeeHandler}
-      search={this.searchEmployeeHandler}
+      ]}     
     />
   }
 
@@ -223,14 +76,17 @@ class App extends Component {
           <ActionBar
             search={this.searchEmployeeHandler} />
           <Switch>
-            <Route exact path="/" component={this.EmployeeTableComponent} />
-            <Route exact path="/manage" component={this.AddEmployeeComponent} />
-            <Route exact path="/manage/:id" component={this.AddEmployeeComponent} />
+            {/* <Route exact path="/" component={this.EmployeeTableComponent} /> */}
+            <Route exact path="/" component={E2} />
+            <Route exact path="/manage" component={ManageEmployee} />
+            <Route exact path="/manage/:id" component={ManageEmployee} />
           </Switch>
         </div>
       </MuiThemeProvider>
     );
   }
 }
-export default App;
+export default connect(
+  (store) => ({ store }),
+  (dispatch) => ({ dispatch }))(App);
 
